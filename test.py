@@ -56,7 +56,7 @@ def main():
                 s = obs[k]["state"][np.newaxis, ...]
                 actions[k] = model(s)
             obs, r, done, _ = env.step(actions)
-            rgb_array = env.render()
+            rgb_array = env.render(mode="rgb_array")
             if args.save_gif:
                 ep_render_lst.append(rgb_array)
             episode_reward += r
