@@ -2,10 +2,10 @@
 torch==1.8.1
 pyyaml
 numpy==1.21.0
-gym
+gym==0.19.0
 gym[box2d]
 wandb
-pettingzoo
+pettingzoo==1.14.0
 pettingzoo[mpe]
 # pettingzoo[sisl] # raise box2d-py error : Aug.11.2021
 pybullet==3.0.0 # latest version(>=3.1.7 print unexpected string "argv[0]=")
