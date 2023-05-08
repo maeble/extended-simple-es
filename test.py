@@ -34,7 +34,11 @@ def main():
     if args.save_gif:
         run_num = args.ckpt_path.split("/")[-3]
         save_dir = f"test_gif/{run_num}/"
-        os.makedirs(save_dir)
+        try:
+            os.makedirs(save_dir)
+        except FileExistsError as error:
+            if len(os.listdir(save_dir))>0:
+                raise error
 
     network = builder.build_network(config["network"])
     network.load_state_dict(torch.load(args.ckpt_path))
