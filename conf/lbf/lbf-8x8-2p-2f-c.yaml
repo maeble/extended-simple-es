@@ -1,0 +1,24 @@
+env: 
+  name: lbf-Foraging-8x8-2p-2f-coop-v1
+  max_step: 100
+  s: False
+  p: 2
+  x: 8
+  f: 2
+  c: True
+  pomdp: False
+
+network:
+  name: gym_model
+  num_state: 12
+  num_action: 6
+  discrete_action: True
+  gru: True
+  has_collection_state_vector: True
+
+strategy:
+  name : openai_es
+  init_sigma: 0.2
+  sigma_decay: 0.9999
+  learning_rate: 0.003
+  offspring_num: 100

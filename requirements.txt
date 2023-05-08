@@ -1,13 +1,18 @@
 # python = 3.8
-torch==1.8.1
-pyyaml
+torch==1.10.1
+pyyaml==6.0
 numpy==1.21.0
-gym
-gym[box2d]
-wandb
-pettingzoo
+gym==0.21.0
+Box2d
+wandb==0.15.2
+pettingzoo==1.23.1
 pettingzoo[mpe]
 # pettingzoo[sisl] # raise box2d-py error : Aug.11.2021
 pybullet==3.0.0 # latest version(>=3.1.7 print unexpected string "argv[0]=")
 moviepy==1.0.3
 black==21.6b0
+lbforaging==1.0.15
+# lbf-versions > 1.0.14 not compatible with gym > 0.21.x https://github.com/semitable/lb-foraging/issues/20
+# but I need gym > 0.21.x for my own code D:
+rware==1.0.3
+pyyaml

@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import torch
 import builder
+import yaml
 
 
 def set_seed(seed):
@@ -22,7 +23,7 @@ def main():
     )
     parser.add_argument("--seed", type=int, default=0, help="random seed.")
     parser.add_argument(
-        "--process-num", type=int, default=12, help="number of mp process."
+        "--process-num", type=int, default=5, help="number of mp process."
     )
     parser.add_argument(
         "--generation-num",
@@ -40,7 +41,7 @@ def main():
     parser.add_argument(
         "--save-model-period",
         type=int,
-        default=10,
+        default=100,
         help="save model for every n iteration.",
     )
     args = parser.parse_args()
@@ -51,6 +52,7 @@ def main():
         config = yaml.load(f, Loader=yaml.FullLoader)
         f.close()
 
+    print(yaml.dump(config))
     loop = builder.build_loop(
         config,
         args.generation_num,

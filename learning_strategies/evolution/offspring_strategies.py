@@ -267,7 +267,7 @@ class simple_evolution(BaseOffspringStrategy):
         return wandb_cfg
 
 
-class openai_es(BaseOffspringStrategy):
+class openai_es(BaseOffspringStrategy): # TODO coevolution as an option instead of shared model
     def __init__(self, init_sigma, sigma_decay, learning_rate, offspring_num):
         super(openai_es, self).__init__()
         self.offspring_num = offspring_num
@@ -276,12 +276,13 @@ class openai_es(BaseOffspringStrategy):
         self.learning_rate = learning_rate
         self.curr_sigma = self.init_sigma
         self.epsilons = []
+        self.agent_ids = None # env.agent_ids (only defined to be able to implement non-shared network in the future)
 
-        self.mu_model = None
-        self.elite_model = None
+        self.mu_model = None # shared networks with parameters 
+        #self.elite_model = None
         self.optimizer = None
 
-    def _gen_offsprings(self, agent_ids, mu_model, sigma, offspring_num):
+    def _gen_offsprings(self, mu_model, sigma, offspring_num):
         """Return offsprings based on current elite models.
 
         Parameters
@@ -307,9 +308,9 @@ class openai_es(BaseOffspringStrategy):
         zero_net.apply_param(zero_net_param_list)
         self.epsilons.append(zero_net)
 
-        offspring_group.append(wrap_agentid(agent_ids, self.mu_model))
+        offspring_group.append(wrap_agentid(self.agent_ids, self.mu_model))
 
-        for _ in range(offspring_num - 1):
+        for _ in range(offspring_num):
             preturbed_net = deepcopy(mu_model)
             epsilon_net = deepcopy(mu_model)
             perturbed_net_param_list = preturbed_net.get_param_list()
@@ -321,11 +322,11 @@ class openai_es(BaseOffspringStrategy):
                 eps_param += epsilon
                 perturb_param += epsilon * sigma
             preturbed_net.apply_param(perturbed_net_param_list)
-            offspring_group.append(wrap_agentid(agent_ids, preturbed_net))
+            offspring_group.append(wrap_agentid(self.agent_ids, preturbed_net)) 
             epsilon_net.apply_param(eps_net_param_list)
             self.epsilons.append(epsilon_net)
 
-        return offspring_group
+        return offspring_group # list( dict{agent_ids-> shared network variant 0}, dict{agent_ids-> shared network variant 1}, ... )
 
     def get_elite_model(self):
         return self.mu_model
@@ -346,12 +347,9 @@ class openai_es(BaseOffspringStrategy):
         """
         self.agent_ids = agent_ids
         network.zero_init()
-        self.elite_model = network
         self.mu_model = network
         self.optimizer = Adam(self.mu_model, self.learning_rate)
-        # agent_ids, elite_models, mu_model, sigma_model, offspring_num
         offspring_group = self._gen_offsprings(
-            self.agent_ids,
             self.mu_model,
             self.curr_sigma,
             self.offspring_num,
@@ -417,7 +415,6 @@ class openai_es(BaseOffspringStrategy):
 
         self.curr_sigma *= self.sigma_decay
         offspring_group = self._gen_offsprings(
-            self.agent_ids,
             self.mu_model,
             self.curr_sigma,
             self.offspring_num,
