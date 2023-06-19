@@ -1,0 +1,25 @@
+env:
+  name: Matrix Games
+  max_step: 
+  pomdp: 
+
+network:
+  name: 
+  num_state: 
+  num_action: 
+  discrete_action: 
+  gru: 
+
+strategy:
+  name : multi_agent_openai_es
+  num_of_agents:
+  parameter_sharing: True
+  reward_standardization: True
+  hidden_dimension: 128
+  evaluation_epsilon: 0.0
+  epsilon_anneal: 50000
+  target_update:
+  init_sigma: 
+  sigma_decay: 
+  learning_rate: 0.0003
+  offspring_num: 

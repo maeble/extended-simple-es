@@ -1,0 +1,26 @@
+env:
+  name: MultiAgentTemplate
+  max_step: 
+  pomdp: 
+
+network:
+  name: 
+  num_state: 
+  num_action: 
+  discrete_action: 
+  gru: 
+
+strategy:
+  name: multi_agent_openai_es
+  num_of_agents:
+  parameter_sharing: False
+  reward_standardization: True
+  hidden_dimension: 64
+  evaluation_epsilon: 0.05
+  epsilon_anneal: 50000
+  target_update: 0.01
+  init_sigma: 
+  sigma_decay: 
+  learning_rate: 0.0005
+  offspring_num: 
+  

@@ -1,0 +1,27 @@
+env:
+  name: MultiAgentTemplate
+  max_step: 
+  pomdp: 
+
+network:
+  name: 
+  num_state: 
+  num_action: 
+  discrete_action: 
+  gru: 
+
+# not sure yet whether I'll need all hyperparameters (should not be the case actually), so I may remove some of them in the future
+strategy:
+  name: multi_agent_openai_es
+  num_of_agents:
+  parameter_sharing: False
+  reward_standardization:
+  hidden_dimension:
+  evaluation_epsilon:
+  epsilon_anneal:
+  target_update:
+  init_sigma: 
+  sigma_decay: 
+  learning_rate:
+  offspring_num: 
+  
