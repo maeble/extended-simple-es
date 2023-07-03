@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 from .abstracts import BaseNetwork
 
@@ -9,7 +10,13 @@ class GymEnvModel(BaseNetwork):
     def __init__(self, num_state=8, num_action=4, discrete_action=True, gru=True):
         super(GymEnvModel, self).__init__()
         self.num_action = num_action
-        self.fc1 = nn.Linear(num_state, 32)
+        print("\nGymEnvModel:")
+        print("num_state=", num_state)
+        print("num_actions=", num_action)
+        print("discrete=", discrete_action)
+        print("gru=", gru)
+        print("\n")
+        self.fc1 = nn.Linear(num_state, 32) # Applies a linear transformation to the incoming data
         self.use_gru = gru
         if self.use_gru:
             self.gru = nn.GRU(32, 32)
@@ -17,11 +24,19 @@ class GymEnvModel(BaseNetwork):
         self.fc2 = nn.Linear(32, num_action)
         self.discrete_action = discrete_action
 
-    def forward(self, x):
+    def forward(self, x, debug=False):
         with torch.no_grad():
+            if debug:
+                print("1: ", x, np.array(x).shape)
             x = torch.from_numpy(x).float()
             x = x.unsqueeze(0)
-            x = torch.tanh(self.fc1(x))
+            if debug:
+                print("2: ", x, np.array(x).shape)
+            x_ = self.fc1(x)
+            if debug:
+                print("3: ", x_, np.array(x_).shape)
+
+            x = torch.tanh(x_)
             if self.use_gru:
                 x, self.h = self.gru(x, self.h)
                 x = torch.tanh(x)
@@ -32,7 +47,8 @@ class GymEnvModel(BaseNetwork):
             else:
                 x = torch.tanh(x.squeeze())
             x = x.detach().cpu().numpy()
-
+            if debug:
+                print(x)
             return x
 
     def reset(self):

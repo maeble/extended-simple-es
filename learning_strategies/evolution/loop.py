@@ -6,6 +6,7 @@ from collections import deque
 import numpy as np
 import multiprocessing as mp
 import torch
+import torch.nn.functional as F
 
 import wandb
 from .abstracts import BaseESLoop
@@ -33,6 +34,7 @@ class ESLoop(BaseESLoop):
         self.generation_num = generation_num
         self.eval_ep_num = eval_ep_num
         self.ep5_rewards = deque(maxlen=5)
+        self.num_states = config["network"]["num_state"]
         self.log = log
         self.save_model_period = save_model_period
 
@@ -55,6 +57,7 @@ class ESLoop(BaseESLoop):
         offsprings = self.offspring_strategy.init_offspring(
             self.network, self.env.get_agent_ids()
         )
+        print("Agents:", self.env.get_agent_ids(), "\n\n")
 
         prev_reward = float("-inf")
         ep_num = 0
@@ -64,7 +67,7 @@ class ESLoop(BaseESLoop):
 
             # create an actor by the number of cores
             p = mp.Pool(self.process_num)
-            arguments = [(self.env, off, self.eval_ep_num) for off in offsprings]
+            arguments = [(self.env, off, self.eval_ep_num, self.num_states) for off in offsprings]
 
             # start ollout actors
             rollout_start_time = time.time()
@@ -105,8 +108,8 @@ class ESLoop(BaseESLoop):
 
 
 # offspring_id, worker_id, eval_ep_num=10
-def RolloutWorker(arguments):
-    env, offspring, eval_ep_num = arguments
+def RolloutWorker(arguments, debug=False):
+    env, offspring, eval_ep_num, num_states = arguments
     total_reward = 0
     for _ in range(eval_ep_num):
         states = env.reset()
@@ -117,6 +120,11 @@ def RolloutWorker(arguments):
             actions = {}
             for k, model in offspring.items():
                 s = states[k]["state"][np.newaxis, ...]
+                if len(s) < num_states: # add zero padding
+                    additional_padding_shape = (num_states - s.size, 0)
+                    s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
+                if debug:
+                    print("\nstates=", s)
                 actions[k] = model(s)
             states, r, done, _ = env.step(actions)
             # env.render()

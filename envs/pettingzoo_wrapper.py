@@ -1,23 +1,43 @@
 import numpy as np
-from pettingzoo.mpe import simple_spread_v2
+from pettingzoo.mpe import simple_spread_v3, simple_adversary_v3, simple_speaker_listener_v3
 from pettingzoo.sisl import multiwalker_v6, waterworld_v3
+from enum import Enum
+
+PETTINGZOO_ENVS = [
+    "simple_spread",
+    "waterworld",
+    "multiwalker",
+    "simple_adversary",
+]
 
 
 class PettingzooWrapper:
     def __init__(self, name, max_step=None):
         if name == "simple_spread":
-            self.env = simple_spread_v2.env(N=2)
+            self.env = simple_spread_v3.env(N=2)
         elif name == "waterworld":
             self.env = waterworld_v3.env()
         elif name == "multiwalker":
             self.env = multiwalker_v6.env()
+        elif name == "simple_adversary":
+            # EPyMARL: https://github.com/semitable/multiagent-particle-envs/blob/master/mpe/scenarios/simple_adversary.py
+            # pettingzoo: https://pettingzoo.farama.org/environments/mpe/simple_adversary/
+            args = {
+                "N": 3
+            }
+            self.env = simple_adversary_v3.env(**args)
+        # elif name == "simple_speaker_listener":
+        #     self.env = simple_speaker_listener_v3.env()
         else:
             assert AssertionError, "wrong env name."
         self.max_step = max_step
         self.curr_step = 0
         self.name = name
         self.agents = self.env.possible_agents
-        self.env.reset()
+        self.states = self.env.reset()
+
+    def num_states(self, agent_id):
+        return np.array(self.states[agent_id]["states"]).shape[1]
 
     def reset(self):
         self.curr_step = 0
@@ -46,7 +66,7 @@ class PettingzooWrapper:
             transition = {}
             transition["state"] = self.env.observe(agent)
             transition["reward"] = self.env.rewards[agent]
-            transition["done"] = self.env.dones[agent]
+            transition["done"] = agent in self.env.agents
             transition["info"] = self.env.infos[agent]
             total_d += int(not transition["done"])
             total_r += transition["reward"]
