@@ -126,6 +126,10 @@ def RolloutWorker(arguments, debug=False):
                 if debug:
                     print("\nstates=", s)
                 actions[k] = model(s)
+                if debug: 
+                    print("\nActions=")
+                    for k,ac in actions.items():
+                        print(k, ":", np.array(ac).shape)
             states, r, done, _ = env.step(actions)
             # env.render()
             total_reward += r

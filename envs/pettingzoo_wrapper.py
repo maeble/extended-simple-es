@@ -1,5 +1,5 @@
 import numpy as np
-from pettingzoo.mpe import simple_spread_v3, simple_adversary_v3, simple_speaker_listener_v3
+from pettingzoo.mpe import simple_spread_v3, simple_adversary_v3, simple_speaker_listener_v4
 from pettingzoo.sisl import multiwalker_v6, waterworld_v3
 from enum import Enum
 
@@ -8,6 +8,7 @@ PETTINGZOO_ENVS = [
     "waterworld",
     "multiwalker",
     "simple_adversary",
+    "simple_speaker_listener",
 ]
 
 
@@ -26,8 +27,12 @@ class PettingzooWrapper:
                 "N": 3
             }
             self.env = simple_adversary_v3.env(**args)
-        # elif name == "simple_speaker_listener":
-        #     self.env = simple_speaker_listener_v3.env()
+        elif name == "simple_speaker_listener":
+            args = {
+                "max_cycles":25, 
+                "continuous_actions": False
+            }
+            self.env = simple_speaker_listener_v4.env(**args)
         else:
             assert AssertionError, "wrong env name."
         self.max_step = max_step

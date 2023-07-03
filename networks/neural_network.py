@@ -41,6 +41,8 @@ class GymEnvModel(BaseNetwork):
                 x, self.h = self.gru(x, self.h)
                 x = torch.tanh(x)
             x = self.fc2(x)
+            if debug:
+                print("4:", x)
             if self.discrete_action:
                 x = F.softmax(x.squeeze(), dim=0)
                 x = torch.argmax(x)
