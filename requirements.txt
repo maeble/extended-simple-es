@@ -11,3 +11,6 @@ pettingzoo[mpe]
 pybullet==3.2.5 # latest version(>=3.1.7 print unexpected string "argv[0]=")
 moviepy==1.0.3
 black==21.6b0
+lbforaging 
+# lbf-versions > 1.0.14 not compatible with gym > 0.21.x https://github.com/semitable/lb-foraging/issues/20
+# but I need gym > 0.21.x for my own code D:

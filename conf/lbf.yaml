@@ -1,0 +1,18 @@
+env: # not working (see requirements.txt)
+  name: Foraging-8x8-2p-1f-coop-v0
+  max_step: 25 # TODO
+  pomdp: False # TODO
+
+network:
+  name: gym_model
+  num_state: 8 # TODO
+  num_action: 6
+  discrete_action: True # TODO
+  gru: False # TODO
+
+strategy:
+  name : openai_es
+  init_sigma: 0.168 # TODO
+  sigma_decay: 0.9999 # TODO
+  learning_rate: 0.087 # TODO
+  offspring_num: 96 # TODO

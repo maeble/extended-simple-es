@@ -1,5 +1,6 @@
 import gym
 import pybullet_envs
+import lbforaging
 
 gym.logger.set_level(40)
 
