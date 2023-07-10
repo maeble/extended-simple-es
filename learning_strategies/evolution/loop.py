@@ -35,6 +35,10 @@ class ESLoop(BaseESLoop):
         self.eval_ep_num = eval_ep_num
         self.ep5_rewards = deque(maxlen=5)
         self.num_states = config["network"]["num_state"]
+        if "has_collection_state_vector" in config["network"].keys():
+            self.coll_state_vector = config["network"]["has_collection_state_vector"]
+        else:
+            self.coll_state_vector = False
         self.log = log
         self.save_model_period = save_model_period
 
@@ -67,7 +71,7 @@ class ESLoop(BaseESLoop):
 
             # create an actor by the number of cores
             p = mp.Pool(self.process_num)
-            arguments = [(self.env, off, self.eval_ep_num, self.num_states) for off in offsprings]
+            arguments = [(self.env, off, self.eval_ep_num, self.num_states, self.coll_state_vector) for off in offsprings]
 
             # start ollout actors
             rollout_start_time = time.time()
@@ -109,7 +113,7 @@ class ESLoop(BaseESLoop):
 
 # offspring_id, worker_id, eval_ep_num=10
 def RolloutWorker(arguments, debug=False):
-    env, offspring, eval_ep_num, num_states = arguments
+    env, offspring, eval_ep_num, num_states, coll_state_vector = arguments
     total_reward = 0
     for _ in range(eval_ep_num):
         states = env.reset()
@@ -118,20 +122,40 @@ def RolloutWorker(arguments, debug=False):
             model.reset()
         while not done:
             actions = {}
-            for k, model in offspring.items():
-                s = states[k]["state"][np.newaxis, ...]
-                if len(s) < num_states: # add zero padding
-                    additional_padding_shape = (num_states - s.size, 0)
-                    s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
+            s = np.array(states[k]["state"])[np.newaxis, ...]
+            if coll_state_vector:
                 if debug:
-                    print("\nstates=", s)
-                actions[k] = model(s)
-                if debug: 
-                    print("\nActions=")
-                    for k,ac in actions.items():
-                        print(k, ":", np.array(ac).shape)
+                    print("split collection state vector...")
+                for k, model in offspring.items():
+                    team_actions = []
+                    for ag_s in s[0]:
+                        ag_s =np.array([ag_s])
+                        model_ag_s = int(__RolloutWorkerModelIterate(model, ag_s, num_states, debug))
+                        team_actions.append(model_ag_s)
+                        actions[k] = team_actions
+            else: 
+                for k, model in offspring.items():
+                    model_s = __RolloutWorkerModelIterate(model, s, num_states, debug)
+                    actions[k] = model_s
             states, r, done, _ = env.step(actions)
-            # env.render()
-            total_reward += r
+            #env.render()
+            if coll_state_vector:
+                #print(r)
+                # FIXME reward is always 0 for envs with collection_state_vector=True
+                total_reward += sum(r)
+            else:
+                total_reward += r
     rewards = total_reward / eval_ep_num
     return rewards
+
+def __RolloutWorkerModelIterate(model, s, num_states, debug):
+    if debug:
+        print("1", s.shape, s)
+    if s.size < num_states: # add zero padding
+        if debug:
+            print("add zero padding...")
+        additional_padding_shape = (num_states - s.size, 0)
+        s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
+        if debug:
+            print("2", s.shape, s)
+    return model(s)

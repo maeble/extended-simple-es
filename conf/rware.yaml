@@ -1,13 +1,13 @@
-env: # not working (see requirements.txt)
-  name: Foraging-8x8-2p-1f-coop-v1 #Foraging-8x8-2p-1f-coop-v1
+env: 
+  name: rware-small-5ag-v1
   max_step: 25 # TODO
   pomdp: False # TODO
 
 network:
   name: gym_model
-  num_state: 10 # TODO
-  num_action: 6
-  discrete_action: True
+  num_state: 71 # TODO
+  num_action: 4
+  discrete_action: True # TODO
   gru: False # TODO
   has_collection_state_vector: True
 

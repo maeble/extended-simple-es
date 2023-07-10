@@ -1,6 +1,7 @@
 import gym
 import pybullet_envs
 import lbforaging
+import rware
 
 gym.logger.set_level(40)
 
