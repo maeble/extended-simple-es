@@ -132,7 +132,7 @@ def RolloutWorker(arguments, debug=False):
                         ag_s =np.array([ag_s])
                         model_ag_s = int(__RolloutWorkerModelIterate(model, ag_s, num_states, debug))
                         team_actions.append(model_ag_s)
-                        actions[k] = team_actions
+                        actions[k] = tuple(team_actions)
             else: 
                 for k, model in offspring.items():
                     model_s = __RolloutWorkerModelIterate(model, s, num_states, debug)
@@ -140,8 +140,6 @@ def RolloutWorker(arguments, debug=False):
             states, r, done, _ = env.step(actions)
             #env.render()
             if coll_state_vector:
-                #print(r)
-                # FIXME reward is always 0 for envs with collection_state_vector=True
                 total_reward += sum(r)
             else:
                 total_reward += r
