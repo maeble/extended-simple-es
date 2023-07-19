@@ -1,6 +1,6 @@
-env: # not working (see requirements.txt)
-  name: Foraging-8x8-2p-1f-coop-v1 #Foraging-8x8-2p-1f-coop-v1
-  max_step: 25 # TODO
+env: 
+  name: lbforaging:Foraging-8x8-2p-2f-coop-v0
+  max_step: 50 # TODO
   pomdp: False # TODO
 
 network:

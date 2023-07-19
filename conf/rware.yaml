@@ -1,6 +1,6 @@
 env: 
   name: rware-small-5ag-v1
-  max_step: 25 # TODO
+  max_step: 1000 # TODO
   pomdp: False # TODO
 
 network:
