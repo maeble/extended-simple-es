@@ -1,0 +1,19 @@
+env: 
+  name: rware-tiny-2ag-v1
+  max_step: 1000 # TODO
+  pomdp: False # TODO
+
+network:
+  name: gym_model
+  num_state: 71 # TODO
+  num_action: 4
+  discrete_action: True # TODO
+  gru: False # TODO
+  has_collection_state_vector: True
+
+strategy:
+  name : openai_es
+  init_sigma: 0.168 # TODO
+  sigma_decay: 0.9999 # TODO
+  learning_rate: 0.087 # TODO
+  offspring_num: 96 # TODO

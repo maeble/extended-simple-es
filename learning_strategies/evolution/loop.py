@@ -46,10 +46,12 @@ class ESLoop(BaseESLoop):
         now = datetime.now()
         curr_time = now.strftime("%Y%m%d%H%M%S")
         dir_lst = []
-        self.save_dir = f"logs/{self.env.name}/{curr_time}"
+        dir_name = self.env.name.replace(":", "_")
+        self.save_dir = f"logs/{dir_name}/{curr_time}"
         dir_lst.append(self.save_dir)
         dir_lst.append(self.save_dir + "/saved_models/")
         for _dir in dir_lst:
+            print(_dir)
             os.makedirs(_dir)
 
         if self.log:
