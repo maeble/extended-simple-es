@@ -48,6 +48,21 @@ RUN pip3 install torchvision snakeviz pytest probscale
 RUN pip3 install git+https://github.com/oxwhirl/smac.git
 ENV SC2PATH /pymarl/3rdparty/StarCraftII
 
-WORKDIR /project
+#### -------------------------------------------------------------------
+#### my extension
+#### -------------------------------------------------------------------
 
+# mpe
+WORKDIR /project
+RUN apt update && apt install -y git
+RUN git clone https://github.com/semitable/multiagent-particle-envs.git; 
+RUN cd multiagent-particle-envs && pip install -e .
+
+# my project
 COPY . /project/es
+WORKDIR /project/es/
+RUN pip install swig 
+RUN pip install -r requirements.txt
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+WORKDIR /project/
