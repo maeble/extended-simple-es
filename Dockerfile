@@ -65,4 +65,7 @@ RUN pip install swig
 RUN pip install -r requirements.txt
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# additional dependencies
+RUN apt install -y zip
+
 WORKDIR /project/
