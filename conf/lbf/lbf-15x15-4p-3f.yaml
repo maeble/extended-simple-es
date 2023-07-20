@@ -1,5 +1,5 @@
 env: # not working (see requirements.txt)
-  name: lbforaging:Foraging-15x15-4p-3f-v1
+  name: Foraging-15x15-4p-3f-v1
   max_step: 50 # TODO
   pomdp: False # TODO
 
