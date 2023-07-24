@@ -1,10 +1,10 @@
 env:
   name: simple_adversary
-  max_step: 25
+  max_step: 100
 
 network:
   name: gym_model
-  num_state: 14 # 28 is wrong
+  num_state: 14
   num_action: 5
   discrete_action: True
   gru: False

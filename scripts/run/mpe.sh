@@ -5,7 +5,7 @@ NC='\033[0m'
 # Configuration
 # ----------------------------------------------------------------------------
 
-GEN_NUM=82000 # *25 time_steps per generation = 2050000 total timesteps
+GEN_NUM=20500 # *100 time_steps per generation = 2050000 total timesteps
 
 # ----------------------------------------------------------------------------
 

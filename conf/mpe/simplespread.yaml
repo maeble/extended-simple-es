@@ -1,6 +1,6 @@
 env:
   name: simple_spread
-  max_step: None
+  max_step: 100
 
 network:
   name: gym_model

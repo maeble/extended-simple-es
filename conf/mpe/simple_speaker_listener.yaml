@@ -1,11 +1,11 @@
 env:
   name: simple_speaker_listener
-  max_step: 25
+  max_step: 100
 
 network:
   name: gym_model
   num_state: 14
-  num_action: 3 # TODO 3 or 5???
+  num_action: 3 
   discrete_action: True # TODO True or False? pettingzoo allows both.
   gru: False
 

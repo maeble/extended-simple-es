@@ -1,6 +1,6 @@
 env: # not working (see requirements.txt)
   name: Foraging-15x15-3p-5f-v1
-  max_step: 25
+  max_step: 100
   pomdp: False # TODO
 
 network:

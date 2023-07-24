@@ -1,5 +1,5 @@
 env: 
-  name: lbforaging:Foraging-8x8-2p-2f-coop-v0
+  name: lbforaging:Foraging-8x8-2p-1f-coop-v1
   max_step: 50 # TODO
   pomdp: False # TODO
 
