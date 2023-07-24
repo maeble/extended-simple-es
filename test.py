@@ -4,6 +4,7 @@ import yaml
 import argparse
 import numpy as np
 import torch
+import torch.nn.functional as F
 import builder
 import os
 from copy import deepcopy
@@ -30,19 +31,20 @@ def main():
 
     env = builder.build_env(config["env"])
     agent_ids = env.get_agent_ids()
+    num_of_epochs = int(os.path.basename(args.ckpt_path).split("_")[1].split(".")[0])
+    print("number of epochs:", num_of_epochs)
 
     if args.save_gif:
         run_num = args.ckpt_path.split("/")[-3]
         save_dir = f"test_gif/{run_num}/"
-        try:
-            os.makedirs(save_dir)
-        except FileExistsError as error:
-            if len(os.listdir(save_dir))>0:
-                raise error
+        os.makedirs(save_dir, exist_ok=True)
+        # except FileExistsError as error:
+        #     if len(os.listdir(save_dir))>0:
+        #         raise error
 
     network = builder.build_network(config["network"])
     network.load_state_dict(torch.load(args.ckpt_path))
-    for i in range(100):
+    for i in range(num_of_epochs):
         models = {}
         for agent_id in agent_ids:
             models[agent_id] = deepcopy(network)
@@ -54,22 +56,49 @@ def main():
         episode_reward = 0
         ep_step = 0
         ep_render_lst = []
+        coll_state_vector = config["network"]["has_collection_state_vector"]
+        num_states = config["network"]["num_state"]
         while not done:
             actions = {}
-            for k, model in models.items():
-                s = obs[k]["state"][np.newaxis, ...]
-                actions[k] = model(s)
+            if coll_state_vector:
+                for k, model in models.items():
+                    s = np.array(obs[k]["state"])[np.newaxis, ...]
+                    team_actions = []
+                    for ag_s in s[0]:
+                        ag_s =np.array([ag_s])
+                        model_ag_s = int(__RolloutWorkerModelIterate(model, ag_s, num_states))
+                        team_actions.append(model_ag_s)
+                        actions[k] = tuple(team_actions)
+            else: 
+                for k, model in models.items():
+                    model_s = __RolloutWorkerModelIterate(model, s, num_states)
+                    actions[k] = model_s
             obs, r, done, _ = env.step(actions)
+
             rgb_array = env.render(mode="rgb_array")
             if args.save_gif:
                 ep_render_lst.append(rgb_array)
-            episode_reward += r
+
+            if coll_state_vector:
+                episode_reward += sum(r)
+            else:
+                episode_reward += r             
             ep_step += 1
         print("reward: ", episode_reward, "ep_step: ", ep_step)
         if args.save_gif:
             clip = ImageSequenceClip(ep_render_lst, fps=30)
-            clip.write_gif(save_dir + f"ep_{i}.gif", fps=30)
+            save_file=save_dir + f"ep_{i}.gif"
+            # if os.path.exists(save_file):
+            #     os.remove(save_file)
+            clip.write_gif(save_file, fps=30)
         del ep_render_lst
+
+
+def __RolloutWorkerModelIterate(model, s, num_states):
+    if s.size < num_states: # add zero padding
+        additional_padding_shape = (num_states - s.size, 0)
+        s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
+    return model(s)
 
 
 if __name__ == "__main__":
