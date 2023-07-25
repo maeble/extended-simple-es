@@ -52,12 +52,12 @@ class GymWrapper:
         return_list = {}
         transition = {}
         s, r, d, info = self.env.step(action["0"])
-        if type(d)==list and all(d): # convert multi-agent done list to boolean
+        if type(d)==list and all(d):
             d = True 
         else:
             d = False
         if self.max_step != "None":
-            if self.curr_step >= self.max_step: # TODO find out why lbf is limited to 50 steps (internal?)
+            if self.curr_step >= self.max_step:
                 if type(d)==bool:
                     d = True
         transition["state"] = s
@@ -65,8 +65,6 @@ class GymWrapper:
         transition["done"] = d
         transition["info"] = info
         return_list["0"] = transition
-        # if d:
-            # print("step =", self.curr_step)
         return return_list, r, d, info
 
     def get_agent_ids(self):
