@@ -10,12 +10,6 @@ class GymEnvModel(BaseNetwork):
     def __init__(self, num_state=8, num_action=4, discrete_action=True, gru=True):
         super(GymEnvModel, self).__init__()
         self.num_action = num_action
-        print("\nGymEnvModel:")
-        print("num_state=", num_state)
-        print("num_actions=", num_action)
-        print("discrete=", discrete_action)
-        print("gru=", gru)
-        print("\n")
         self.fc1 = nn.Linear(num_state, 32) # Applies a linear transformation to the incoming data
         self.use_gru = gru
         if self.use_gru:
