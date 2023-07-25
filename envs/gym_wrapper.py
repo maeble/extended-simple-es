@@ -7,17 +7,33 @@ gym.logger.set_level(40)
 
 
 class GymWrapper:
-    def __init__(self, name, max_step=None, pomdp=False):
-        self.env = gym.make(name)
-        if pomdp:
-            if "LunarLander" in name:
-                print("POMDP LunarLander")
-                self.env = LunarLanderPOMDP(self.env)
-            elif "CartPole" in name:
-                print("POMDP CartPole")
-                self.env = CartPolePOMDP(self.env)
-            else:
-                raise AssertionError(f"{name} doesn't support POMDP.")
+    def __init__(self, name, max_step=None, pomdp=False, kwargs=None):
+        if name.startswith("lbf"):
+            gym.envs.register(
+                id=name,
+                entry_point="lbforaging.foraging:ForagingEnv",
+                kwargs={
+                    "players": kwargs["p"],
+                    "max_player_level": 3,
+                    "field_size": (kwargs["x"], kwargs["x"]),
+                    "max_food": kwargs["f"],
+                    "sight": kwargs["s"],
+                    "max_episode_steps": max_step,
+                    "force_coop": kwargs["c"],
+                }
+            )
+            self.env = gym.make(name)
+        else:
+            self.env = gym.make(name)
+            if pomdp:
+                if "LunarLander" in name:
+                    print("POMDP LunarLander")
+                    self.env = LunarLanderPOMDP(self.env)
+                elif "CartPole" in name:
+                    print("POMDP CartPole")
+                    self.env = CartPolePOMDP(self.env)
+                else:
+                    raise AssertionError(f"{name} doesn't support POMDP.")
         self.max_step = max_step
         self.curr_step = 0
         self.name = name

@@ -11,7 +11,7 @@ def build_env(config):
     if config["name"] in PETTINGZOO_ENVS:
         return PettingzooWrapper(config["name"], config["max_step"])
     else:
-        return GymWrapper(config["name"], config["max_step"], config["pomdp"])
+        return GymWrapper(config["name"], config["max_step"], config["pomdp"], config)
 
 
 def build_network(config):

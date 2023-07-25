@@ -15,7 +15,11 @@ PETTINGZOO_ENVS = [
 class PettingzooWrapper:
     def __init__(self, name, max_step=None):
         if name == "simple_spread":
-            self.env = simple_spread_v3.env(N=2)
+            args = {
+                "N": 2,
+                "max_cycles":max_step, 
+            }
+            self.env = simple_spread_v3.env(**args)
         elif name == "waterworld":
             self.env = waterworld_v3.env()
         elif name == "multiwalker":
@@ -24,13 +28,13 @@ class PettingzooWrapper:
             # EPyMARL: https://github.com/semitable/multiagent-particle-envs/blob/master/mpe/scenarios/simple_adversary.py
             # pettingzoo: https://pettingzoo.farama.org/environments/mpe/simple_adversary/
             args = {
-                "N": 3
+                "N": 3,
+                "max_cycles":max_step, 
             }
             self.env = simple_adversary_v3.env(**args)
         elif name == "simple_speaker_listener":
             args = {
-                "max_cycles":25, 
-                "continuous_actions": False
+                "max_cycles":max_step, 
             }
             self.env = simple_speaker_listener_v4.env(**args)
         else:

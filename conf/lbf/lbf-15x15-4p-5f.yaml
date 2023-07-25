@@ -1,19 +1,24 @@
-env: # not working (see requirements.txt)
-  name: Foraging-15x15-4p-5f-v1
+env: 
+  name: lbf-Foraging-15x15-4p-5f-v1
   max_step: 100
-  pomdp: False # TODO
+  s: False
+  p: 4
+  x: 15
+  f: 5
+  c: False
+  pomdp: False 
 
 network:
   name: gym_model
-  num_state: 27 # TODO
+  num_state: 27
   num_action: 6
   discrete_action: True
-  gru: False # TODO
+  gru: False
   has_collection_state_vector: True
 
 strategy:
   name : openai_es
-  init_sigma: 0.168 # TODO
-  sigma_decay: 0.9999 # TODO
-  learning_rate: 0.087 # TODO
-  offspring_num: 96 # TODO
+  init_sigma: 3
+  sigma_decay: 0.9999 
+  learning_rate: 0.003
+  offspring_num: 100
