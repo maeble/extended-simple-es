@@ -346,7 +346,7 @@ class openai_es(BaseOffspringStrategy):
         """
         self.agent_ids = agent_ids
         network.zero_init()
-        self.elite_model = network
+        #self.elite_model = network
         self.mu_model = network
         self.optimizer = Adam(self.mu_model, self.learning_rate)
         # agent_ids, elite_models, mu_model, sigma_model, offspring_num
@@ -432,40 +432,3 @@ class openai_es(BaseOffspringStrategy):
             offspring_num=self.offspring_num,
         )
         return wandb_cfg
-    
-
-class multi_agent_openai_es(BaseOffspringStrategy):
-    def __init__(self, num_of_agents, parameter_sharing:bool, reward_standardization:bool, hidden_dimension,
-                 evaluation_epsilon, epsilon_anneal, target_update, 
-                 init_sigma, sigma_decay, learning_rate, offspring_num):
-        super(openai_es, self).__init__()
-        self.num_of_agents = num_of_agents
-        self.parameter_sharing = parameter_sharing
-        self.reward_standardization = reward_standardization
-        self.hidden_dimension = hidden_dimension
-        self.evaluation_epsilon = evaluation_epsilon
-        self.epsilon_anneal = epsilon_anneal
-        self.target_update = target_update
-
-        self.offspring_num = offspring_num
-        self.init_sigma = init_sigma # noise standard deviation
-        self.sigma_decay = sigma_decay
-        self.learning_rate = learning_rate # alpha
-        self.curr_sigma = self.init_sigma
-        self.epsilons = []
-
-        self.mu_model = None
-        self.elite_model = None
-        self.optimizer = None
-
-    def _gen_offsprings(self): # TODO implement me
-        pass
-
-    def get_elite_model(self): # TODO implement me
-        pass
-
-    def init_offspring(self): # TODO implement me
-        pass
-
-    def evaluate(self): # TODO implement me
-        pass
