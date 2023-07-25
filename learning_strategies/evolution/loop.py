@@ -125,7 +125,6 @@ class ESLoop(BaseESLoop):
             # save results to json file   
             ep_length = steps[0]          
             total_steps = ep_length+total_steps
-            print(total_steps)
             if (ep_num-1) % self.save_model_period == 0: 
                 timestamp = datetime.now().strftime("%Y-%m-%dT0%H:%M:%S.%s")    
                 results_json["return_mean"]["steps"].append(total_steps)
