@@ -123,7 +123,7 @@ class ESLoop(BaseESLoop):
             )
 
             # save results to json file   
-            ep_length = steps[0]          
+            ep_length = int(np.mean(steps))        
             total_steps = ep_length+total_steps
             if (ep_num-1) % self.save_model_period == 0: 
                 timestamp = datetime.now().strftime("%Y-%m-%dT0%H:%M:%S.%s")    
@@ -163,14 +163,14 @@ class ESLoop(BaseESLoop):
 def RolloutWorker(arguments, debug=False): # TODO shared state option
     env, offspring, eval_ep_num, num_states, coll_state_vector = arguments
     total_reward = 0
+    total_steps = 0
     
-    for _ in range(eval_ep_num):
+    for _ in range(eval_ep_num): # evaluations per iteration
         states = env.reset()
         done = False
         for k, model in offspring.items():
             model.reset()
 
-        steps = 0
         while not done:
             actions = {}
             s = np.array(states[k]["state"])[np.newaxis, ...]
@@ -189,8 +189,7 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
                     model_s = __RolloutWorkerModelIterate(model, s, num_states, debug)
                     actions[k] = model_s
             states, r, done, _ = env.step(actions)
-            #print("states=",states)
-            steps += 1
+            total_steps += 1
 
             #env.render()
             if coll_state_vector:
@@ -198,9 +197,9 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
             else:
                 total_reward += r
 
-        #print("steps:", steps)
     rewards = total_reward / eval_ep_num
-    return [rewards,steps]
+    steps_mean = total_steps / eval_ep_num
+    return [rewards,steps_mean]
 
 def __RolloutWorkerModelIterate(model, s, num_states, debug):
     if debug:
