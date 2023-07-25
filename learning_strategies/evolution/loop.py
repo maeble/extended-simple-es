@@ -54,7 +54,7 @@ class ESLoop(BaseESLoop):
         
         # prepare results output
         save_results_dir = os.path.join(self.save_logs_dir, "results/")
-        save_results_filename = "results.json"
+        save_results_filename = "metrics.json"
         self.save_results_path = os.path.join(save_results_dir, save_results_filename)
         os.makedirs(save_results_dir, exist_ok=True)
 
@@ -130,7 +130,7 @@ class ESLoop(BaseESLoop):
                 timestamp = datetime.now().strftime("%Y-%m-%dT0%H:%M:%S.%s")    
                 results_json["return_mean"]["steps"].append(total_steps)
                 results_json["return_mean"]["timestamps"].append(timestamp)
-                results_json["return_mean"]["values"].append(np.mean(results)) # TODO or best reward? or sum?
+                results_json["return_mean"]["values"].append(np.mean(results))
                 results_json["ep_length_mean"]["steps"].append(total_steps)
                 results_json["ep_length_mean"]["timestamps"].append(timestamp)
                 results_json["ep_length_mean"]["values"].append(ep_length)
