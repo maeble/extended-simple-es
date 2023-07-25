@@ -10,6 +10,7 @@ import os
 from copy import deepcopy
 from learning_strategies.evolution.loop import ESLoop
 from moviepy.editor import ImageSequenceClip
+import json 
 
 
 def set_seed(seed):
@@ -30,21 +31,20 @@ def main():
         f.close()
 
     env = builder.build_env(config["env"])
-    agent_ids = env.get_agent_ids()
+    agent_ids = env.get_agent_ids() 
     num_of_epochs = int(os.path.basename(args.ckpt_path).split("_")[1].split(".")[0])
-    print("number of epochs:", num_of_epochs)
+    run_num = args.ckpt_path.split("/")[-3]
 
+    print("number of epochs trained:", num_of_epochs)
+
+    # create save dirs
     if args.save_gif:
-        run_num = args.ckpt_path.split("/")[-3]
-        save_dir = f"test_gif/{run_num}/"
-        os.makedirs(save_dir, exist_ok=True)
-        # except FileExistsError as error:
-        #     if len(os.listdir(save_dir))>0:
-        #         raise error
-
+        save_clips_dir = f"test_gif/{run_num}/"
+        os.makedirs(save_clips_dir, exist_ok=True)
+        
     network = builder.build_network(config["network"])
     network.load_state_dict(torch.load(args.ckpt_path))
-    for i in range(num_of_epochs):
+    for i in range(100):
         models = {}
         for agent_id in agent_ids:
             models[agent_id] = deepcopy(network)
@@ -71,6 +71,7 @@ def main():
                         actions[k] = tuple(team_actions)
             else: 
                 for k, model in models.items():
+                    s = np.array(obs[k]["state"])[np.newaxis, ...]
                     model_s = __RolloutWorkerModelIterate(model, s, num_states)
                     actions[k] = model_s
             obs, r, done, _ = env.step(actions)
@@ -87,10 +88,8 @@ def main():
         print("reward: ", episode_reward, "ep_step: ", ep_step)
         if args.save_gif:
             clip = ImageSequenceClip(ep_render_lst, fps=30)
-            save_file=save_dir + f"ep_{i}.gif"
-            # if os.path.exists(save_file):
-            #     os.remove(save_file)
-            clip.write_gif(save_file, fps=30)
+            save_clips_file=save_clips_dir + f"ep_{i}.gif"
+            clip.write_gif(save_clips_file, fps=30) # overwrites existing files
         del ep_render_lst
 
 
