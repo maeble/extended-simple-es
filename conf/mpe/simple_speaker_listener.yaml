@@ -8,6 +8,7 @@ network:
   num_action: 3 
   discrete_action: True # TODO True or False? pettingzoo allows both.
   gru: False
+  has_collection_state_vector: False
 
 strategy:
   name : openai_es
