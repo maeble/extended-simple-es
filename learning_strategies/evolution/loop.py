@@ -84,6 +84,7 @@ class ESLoop(BaseESLoop):
         )
         print("Agents:", self.env.get_agent_ids(), "\n\n")
 
+        # run generations
         prev_reward = float("-inf")
         total_steps = 0
         ep_num = 0
@@ -91,37 +92,32 @@ class ESLoop(BaseESLoop):
             start_time = time.time()
             ep_num += 1
 
-            # create an actor by the number of cores
-            p = mp.Pool(self.process_num)
+            # rollout (test agents in env, no training)
+            p = mp.Pool(self.process_num) # create an actor by the number of cores
             arguments = [(self.env, off, self.eval_ep_num, self.num_states, self.coll_state_vector) for off in offsprings]
-
-            # start rollout actors
             rollout_start_time = time.time()
-
             # rollout(https://stackoverflow.com/questions/41273960/python-3-does-pool-keep-the-original-order-of-data-passed-to-map)
             if self.process_num > 1:
-                results,steps = np.swapaxes(p.map(RolloutWorker, arguments), 0,1)
+                results, steps = np.swapaxes(p.map(RolloutWorker, arguments), 0,1)
             else:
-                results,steps = np.swapaxes([RolloutWorker(arg) for arg in arguments])
-            # concat output lists to single list
+                results, steps = np.swapaxes([RolloutWorker(arg) for arg in arguments])
             p.close()
             rollout_consumed_time = time.time() - rollout_start_time
 
+            # evaluate
             eval_start_time = time.time()
             offsprings, best_reward, curr_sigma = self.offspring_strategy.evaluate(
                 results
             )
             eval_consumed_time = time.time() - eval_start_time
 
-            # print log
+            # print commandline log
             consumed_time = time.time() - start_time
             total_time_trained = (datetime.now() - total_start_time)
-            total_time_trained = self.__strfdelta(total_time_trained, "{days} days {hours}:{minutes}:{seconds}h")
-                         
+            total_time_trained = self.__strfdelta(total_time_trained, "{days} days {hours}:{minutes}:{seconds} h")      
             print(
                 f"episode: {ep_num}, Best reward: {best_reward:.2f}, sigma: {curr_sigma:.3f}, time: {consumed_time:.2f}, rollout_t: {rollout_consumed_time:.2f}, eval_t: {eval_consumed_time:.2f}, total_time_trained: {total_time_trained}"
             )
-
             # save results to json file   
             ep_length = int(np.mean(steps))        
             total_steps = ep_length+total_steps
@@ -135,7 +131,7 @@ class ESLoop(BaseESLoop):
                 results_json["ep_length_mean"]["values"].append(ep_length)
                 with open (self.save_results_path, "w") as outfile:
                     outfile.write(json.dumps(results_json, indent=4))
-
+            # log with wandb
             prev_reward = best_reward
             if self.log:
                 self.ep5_rewards.append(best_reward)
@@ -143,12 +139,11 @@ class ESLoop(BaseESLoop):
                 wandb.log(
                     {"ep5_mean_reward": ep5_mean_reward, "curr_sigma": curr_sigma}
                 )
-
+            # save pt model
             elite = self.offspring_strategy.get_elite_model()
             if (ep_num-1) % self.save_model_period == 0:
                 save_pth = self.save_logs_dir + "/saved_models" + f"/ep_{ep_num}.pt"
                 torch.save(elite.state_dict(), save_pth)
-
         # finally
 
     def __strfdelta(self, tdelta, fmt):
@@ -158,8 +153,6 @@ class ESLoop(BaseESLoop):
         return fmt.format(**d)
             
 
-
-# offspring_id, worker_id, eval_ep_num=10
 def RolloutWorker(arguments, debug=False): # TODO shared state option
     env, offspring, eval_ep_num, num_states, coll_state_vector = arguments
     total_reward = 0
@@ -169,14 +162,12 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
         states = env.reset()
         done = False
         for k, model in offspring.items():
-            model.reset()
+            model.reset() # resets gnu if use_gnu = True
 
         while not done:
             actions = {}
             s = np.array(states[k]["state"])[np.newaxis, ...]
-            if coll_state_vector:
-                if debug:
-                    print("split collection state vector...")
+            if coll_state_vector: 
                 for k, model in offspring.items():
                     team_actions = []
                     for ag_s in s[0]:
@@ -186,7 +177,7 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
                         actions[k] = tuple(team_actions)
             else: 
                 for k, model in offspring.items():
-                    model_s = __RolloutWorkerModelIterate(model, s, num_states, debug)
+                    model_s = __RolloutWorkerModelIterate(model, s, num_states, debug) 
                     actions[k] = model_s
             states, r, done, _ = env.step(actions)
             total_steps += 1
@@ -211,4 +202,4 @@ def __RolloutWorkerModelIterate(model, s, num_states, debug):
         s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
         if debug:
             print("2", s.shape, s)
-    return model(s)
+    return model(s)  # returns agent action
