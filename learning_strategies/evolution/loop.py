@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import yaml
 from datetime import datetime
 from collections import deque
 
@@ -28,6 +29,7 @@ class ESLoop(BaseESLoop):
     ):
         super().__init__()
         self.env = env
+        self.__config = config
         self.network = network
         self.process_num = process_num
         self.network.zero_init()
@@ -54,8 +56,9 @@ class ESLoop(BaseESLoop):
         
         # prepare results output
         save_results_dir = os.path.join(self.save_logs_dir, "results/")
-        save_results_filename = "metrics.json"
-        self.save_results_path = os.path.join(save_results_dir, save_results_filename)
+        self.save_results_path = os.path.join(save_results_dir, "metrics.json")
+        self.save_config_path_json = os.path.join(save_results_dir, "config.json")
+        self.save_config_path_yaml = os.path.join(save_results_dir, "config.yaml")
         os.makedirs(save_results_dir, exist_ok=True)
 
         # print info
@@ -66,6 +69,12 @@ class ESLoop(BaseESLoop):
             wandb.init(project=self.env.name, config=config)
 
     def run(self):
+        # save config
+        with open (self.save_config_path_json, "w") as outfile:
+            outfile.write(json.dumps(self.__config, indent=4))
+        with open (self.save_config_path_yaml, "w") as outfile:
+            outfile.write(yaml.dump(self.__config, indent=4))
+
         # create results dict
         results_json = {}
         results_json["ep_length_mean"] = {}
@@ -92,9 +101,9 @@ class ESLoop(BaseESLoop):
             start_time = time.time()
             ep_num += 1
 
-            # rollout (test agents in env, no training)
+            # rollout (test offsprings in env, no training)
             p = mp.Pool(self.process_num) # create an actor by the number of cores
-            arguments = [(self.env, off, self.eval_ep_num, self.num_states, self.coll_state_vector) for off in offsprings]
+            arguments = [(self.env, off, self.eval_ep_num, self.num_states, self.coll_state_vector) for off in offsprings] # off = dict{agents -> shared network variant}
             rollout_start_time = time.time()
             # rollout(https://stackoverflow.com/questions/41273960/python-3-does-pool-keep-the-original-order-of-data-passed-to-map)
             if self.process_num > 1:
@@ -153,7 +162,7 @@ class ESLoop(BaseESLoop):
         return fmt.format(**d)
             
 
-def RolloutWorker(arguments, debug=False): # TODO shared state option
+def RolloutWorker(arguments, debug=False):
     env, offspring, eval_ep_num, num_states, coll_state_vector = arguments
     total_reward = 0
     total_steps = 0
@@ -167,8 +176,8 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
         while not done:
             actions = {}
             s = np.array(states[k]["state"])[np.newaxis, ...]
-            if coll_state_vector: 
-                for k, model in offspring.items():
+            if coll_state_vector: # gym: all agents are hidden in agent "0" - all related vars are lists of the actual agent vars
+                for k, model in offspring.items(): # test variant for each agent
                     team_actions = []
                     for ag_s in s[0]:
                         ag_s =np.array([ag_s])
@@ -176,7 +185,7 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
                         team_actions.append(model_ag_s)
                         actions[k] = tuple(team_actions)
             else: 
-                for k, model in offspring.items():
+                for k, model in offspring.items(): # test varaint for each agent
                     model_s = __RolloutWorkerModelIterate(model, s, num_states, debug) 
                     actions[k] = model_s
             states, r, done, _ = env.step(actions)
@@ -193,13 +202,7 @@ def RolloutWorker(arguments, debug=False): # TODO shared state option
     return [rewards,steps_mean]
 
 def __RolloutWorkerModelIterate(model, s, num_states, debug):
-    if debug:
-        print("1", s.shape, s)
     if s.size < num_states: # add zero padding
-        if debug:
-            print("add zero padding...")
         additional_padding_shape = (num_states - s.size, 0)
         s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
-        if debug:
-            print("2", s.shape, s)
     return model(s)  # returns agent action
