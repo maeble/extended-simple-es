@@ -7,4 +7,4 @@ find . -name "*:*" -exec rename 's|:|-|g' {} \;
 
 # ---------- zip outputs
 #./scripts/get/get_gifs.sh
-zip -r pt_models.zip logs/ # models, results.json
+zip -r es.zip logs/ # saved_models, results
