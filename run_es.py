@@ -23,7 +23,7 @@ def main():
     )
     parser.add_argument("--seed", type=int, default=0, help="random seed.")
     parser.add_argument(
-        "--process-num", type=int, default=6, help="number of mp process."
+        "--process-num", type=int, default=5, help="number of mp process."
     )
     parser.add_argument(
         "--generation-num",
