@@ -13,6 +13,6 @@ network:
 strategy:
   name : openai_es
   init_sigma: 0.2
-  sigma_decay: 0.99999
-  learning_rate: 0.0005
-  offspring_num: 240
+  sigma_decay: 0.9999
+  learning_rate: 0.003
+  offspring_num: 100
