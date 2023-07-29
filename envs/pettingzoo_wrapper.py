@@ -82,14 +82,15 @@ class PettingzooWrapper:
             self.env.step(act)
             if agent == self.agents[-1]:
                 break
-        total_d = 0
+        total_d = 0 # number of agents that are not done
         total_r = 0
         for agent in self.env.agents:
+            observation, reward, termination, truncation, info = self.env.last()
             transition = {}
-            transition["state"] = self.env.observe(agent)
-            transition["reward"] = self.env.rewards[agent]
-            transition["done"] = agent in self.env.agents
-            transition["info"] = self.env.infos[agent]
+            transition["state"] = observation
+            transition["reward"] = reward
+            transition["done"] = termination
+            transition["info"] = info
             total_d += int(not transition["done"])
             total_r += transition["reward"]
             return_list[agent] = transition
