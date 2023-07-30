@@ -1,3 +1,5 @@
+# Note: this script requires an environment variable: seed=(int)
+
 # ----------------------------------------------------------------------------
 # Configuration
 # ----------------------------------------------------------------------------
@@ -6,7 +8,8 @@ export LOG=false
 
 # ----------------------------------------------------------------------------
 
-# run only sparse reward envs
+[ -z "$seed" ] && echo "no variable \$seed defined" && exit 1
+export SEED=$seed
 ./scripts/run/lbf.sh
 ./scripts/run/rware.sh
 ./scripts/run/mpe.sh
