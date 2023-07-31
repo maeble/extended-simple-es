@@ -6,14 +6,14 @@ For installation and usage notes, please visit [simple-es](https://github.com/ji
 
 ### Changes to simple-es
 
-- add version info to `requirements.txt`
+- add package version info to `requirements.txt`
 - adds multi-agent support for `gym` environments
 - uses a different neural network model
 - adds logs for mean return and mean steps per episode that are saved to file
 - adds the following environments:
   - [Level Based Foraging (lbforaging)](https://github.com/semitable/lb-foraging)
   - [Robotic Warehouse (rware)](https://github.com/semitable/robotic-warehouse)
-  - Multi-Particle Environments:
+  - Multi-Particle Environments (MPE):
     - [speaker-listener](https://pettingzoo.farama.org/environments/mpe/simple_speaker_listener/)
     - [adversary](https://pettingzoo.farama.org/environments/mpe/simple_adversary/#simple-adversary)
 - bug fixes:
