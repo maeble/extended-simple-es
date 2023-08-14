@@ -14,7 +14,7 @@ class GymEnvModel(BaseNetwork):
         self.discrete_action = discrete_action
         self.hidden_dimension = 64
         # nn model --------------------------------------------------------------------------
-        # similar to EpyMARL RNNAgent Network Model
+        # adapted from the model of EPyMARL: https://github.com/uoe-agents/epymarl/blob/main/src/modules/agents/rnn_agent.py
         self.fc1 = nn.Linear(num_state, self.hidden_dimension) # Applies a linear transformation to the incoming data
         self.h = self.init_hidden() # hidden state
         if self.use_gru: # else: fc
