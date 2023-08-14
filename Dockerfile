@@ -1,5 +1,6 @@
 FROM nvidia/cuda:11.0.3-base-ubuntu20.04 
-# I needed to replace the image as it was removed
+# Source: https://github.com/uoe-agents/epymarl/blob/main/docker/Dockerfile
+# Note: I needed to replace the image as it was removed
 
 # CUDA includes
 ENV CUDA_PATH /usr/local/cuda
@@ -48,8 +49,9 @@ RUN pip3 install torchvision snakeviz pytest probscale
 RUN pip3 install git+https://github.com/oxwhirl/smac.git
 ENV SC2PATH /pymarl/3rdparty/StarCraftII
 
+
 #### -------------------------------------------------------------------
-#### my extension
+#### new for the simple-es extension
 #### -------------------------------------------------------------------
 
 # mpe
