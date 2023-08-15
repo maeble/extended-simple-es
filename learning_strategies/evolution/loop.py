@@ -101,7 +101,7 @@ class ESLoop(BaseESLoop):
             start_time = time.time()
             ep_num += 1
 
-            # rollout (test offsprings in env, no training)
+            # evaluation (test offsprings in env, no training)
             p = mp.Pool(self.process_num) # create an actor by the number of cores
             arguments = [(self.env, off, self.eval_ep_num, self.num_states, self.coll_state_vector) for off in offsprings] # off = dict{agents -> shared network variant}
             rollout_start_time = time.time()
@@ -113,7 +113,7 @@ class ESLoop(BaseESLoop):
             p.close()
             rollout_consumed_time = time.time() - rollout_start_time
 
-            # evaluate
+            # update
             eval_start_time = time.time()
             offsprings, best_reward, curr_sigma = self.offspring_strategy.evaluate(
                 results
@@ -125,7 +125,8 @@ class ESLoop(BaseESLoop):
             total_time_trained = (datetime.now() - total_start_time)
             total_time_trained = self.__strfdelta(total_time_trained, "{days} days {hours}:{minutes}:{seconds} h")      
             print(
-                f"episode: {ep_num}, Best reward: {best_reward:.2f}, sigma: {curr_sigma:.3f}, time: {consumed_time:.2f}, rollout_t: {rollout_consumed_time:.2f}, eval_t: {eval_consumed_time:.2f}, total_time_trained: {total_time_trained}"
+                f"episode: {ep_num}, Best reward: {best_reward:.2f}, sigma: {curr_sigma:.3f}, time: {consumed_time:.2f}, " + \
+                f"rollout_t: {rollout_consumed_time:.2f}, eval_t: {eval_consumed_time:.2f}, total_time_trained: {total_time_trained}"
             )
             # save results to json file   
             ep_length = int(np.mean(steps))        
@@ -175,30 +176,29 @@ def RolloutWorker(arguments, debug=False):
 
         while not done:
             actions = {}
-            s = np.array(states[k]["state"])[np.newaxis, ...]
-            if coll_state_vector: # gym: all agents are hidden in agent "0" - all related vars are lists of the actual agent vars
+            if coll_state_vector: # gym, multi-agent: all agents are hidden in agent "0" - all related vars are lists of the actual agent vars
                 for k, model in offspring.items(): # test variant for each agent
+                    s = np.array(states[k]["state"])[np.newaxis, ...]
                     team_actions = []
                     for ag_s in s[0]:
                         ag_s =np.array([ag_s])
-                        model_ag_s = int(__RolloutWorkerModelIterate(model, ag_s, num_states, debug))
-                        team_actions.append(model_ag_s)
+                        ag_action = int(__calculate_action_choice(model, ag_s, num_states))
+                        team_actions.append(ag_action)
                         actions[k] = tuple(team_actions)
             else: 
                 for k, model in offspring.items(): # test varaint for each agent
-                    model_s = __RolloutWorkerModelIterate(model, s, num_states, debug) 
-                    actions[k] = model_s
+                    s = np.array(states[k]["state"])[np.newaxis, ...]
+                    action = __calculate_action_choice(model, s, num_states) 
+                    actions[k] = action
             states, r, done, _ = env.step(actions)
             total_steps += 1
-
-            #env.render() 
             total_reward += r
 
     rewards = total_reward / eval_ep_num
     steps_mean = total_steps / eval_ep_num
     return [rewards,steps_mean]
 
-def __RolloutWorkerModelIterate(model, s, num_states, debug):
+def __calculate_action_choice(model, s, num_states):
     if s.size < num_states: # add zero padding
         additional_padding_shape = (num_states - s.size, 0)
         s = F.pad(torch.Tensor(s), additional_padding_shape, "constant", 0).numpy()
