@@ -4,12 +4,34 @@
 
 ### Usage 
 
-For installation and basic usage notes, please visit [simple-es](https://github.com/jinPrelude/simple-es).
+For installation and general usage notes, please visit [simple-es](https://github.com/jinPrelude/simple-es).
+
+
+#### Testing
 
 If you want to check if everything works fine and all environment configurations can be run, execute:
 
 ```bash
 ./scripts/test.sh
+```
+
+#### Docker
+
+If you want to build and run the project in a docker container, execute the following commands:
+
+Build the container:
+```bash
+docker build . -t "es-experiment:base"
+```
+
+Run a sample experiment:
+```bash
+docker run -e seed=0 es-experiment:base bash ./scripts/run.sh
+```
+
+Run interactively:
+```bash
+docker run -it es-experiment:base bash
 ```
 
 ### Changes to simple-es

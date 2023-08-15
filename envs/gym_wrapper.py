@@ -52,6 +52,8 @@ class GymWrapper:
         return_list = {}
         transition = {}
         s, r, d, info = self.env.step(action["0"])
+        if type(r)==list:
+            r = sum(r)
         if type(d)==list and all(d):
             d = True 
         else:
