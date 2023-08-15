@@ -191,11 +191,8 @@ def RolloutWorker(arguments, debug=False):
             states, r, done, _ = env.step(actions)
             total_steps += 1
 
-            #env.render()
-            if coll_state_vector:
-                total_reward += sum(r)
-            else:
-                total_reward += r
+            #env.render() 
+            total_reward += r
 
     rewards = total_reward / eval_ep_num
     steps_mean = total_steps / eval_ep_num
