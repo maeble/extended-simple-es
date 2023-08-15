@@ -70,4 +70,3 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 # additional dependencies
 RUN apt install -y zip
 
-WORKDIR /project/
