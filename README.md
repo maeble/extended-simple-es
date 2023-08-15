@@ -6,10 +6,10 @@
 
 For installation and general usage notes, please visit [simple-es](https://github.com/jinPrelude/simple-es).
 
-
 #### Testing
 
 If you want to check if everything works fine and all environment configurations can be run, execute:
+
 
 ```bash
 ./scripts/test.sh

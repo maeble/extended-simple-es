@@ -176,6 +176,7 @@ def RolloutWorker(arguments, debug=False):
 
         while not done:
             actions = {}
+
             if coll_state_vector: # gym, multi-agent: all agents are hidden in agent "0" - all related vars are lists of the actual agent vars
                 for k, model in offspring.items(): # test variant for each agent
                     s = np.array(states[k]["state"])[np.newaxis, ...]
@@ -197,6 +198,7 @@ def RolloutWorker(arguments, debug=False):
     rewards = total_reward / eval_ep_num
     steps_mean = total_steps / eval_ep_num
     return [rewards,steps_mean]
+
 
 def __calculate_action_choice(model, s, num_states):
     if s.size < num_states: # add zero padding

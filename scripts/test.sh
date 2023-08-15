@@ -1,6 +1,7 @@
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+
 echo && echo -e ${BLUE}mpe${NC}  && 
 python run_es.py --cfg-path conf/mpe/simplespread.yaml --generation-num 2 &&  
 python run_es.py --cfg-path conf/mpe/simple_speaker_listener.yaml --generation-num 2 && 
